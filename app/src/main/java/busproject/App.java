@@ -3,12 +3,62 @@
  */
 package busproject;
 
+
+
+import java.net.URI;
+import java.net.URLConnection;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Scanner;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+import java.nio.charset.Charset;
+
+
+
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
+
+
+
+
+
+
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+
+
+
+        Scanner sc= new Scanner(System.in);
+        System.out.println("Input bus stop code:");
+        String userStopCodeInput=sc.nextLine();   //490000129R
+
+        System.out.println(userStopCodeInput);
+
+String urlAPI="https://api.tfl.gov.uk/StopPoint/"+userStopCodeInput+"/Arrivals/?app_key=68d5f5951c8f4ab98a9b491f59c96c18";
+
+
+
+        // Connect to the URL using java's native library
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(urlAPI))
+                .build();
+        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenAccept(System.out::println)
+                .join();
+
+       request.headers();
+
+
+
+
+
     }
 }
