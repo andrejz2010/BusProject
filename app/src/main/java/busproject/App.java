@@ -15,12 +15,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Scanner;
-import java.util.ArrayList;
-
-
+import java.util.*;
 
 
 public class App {
@@ -51,6 +46,7 @@ public class App {
 
 
 
+
     public static void main(String[] args) {
 
 
@@ -67,8 +63,9 @@ public class App {
 
 
 
-        HashMap<String, Bus> BusesToStop = new HashMap<String , Bus>();
-        ArrayList<Integer> timesToArrival = new ArrayList<Integer>();
+
+
+        ArrayList<Bus> timesToArrival = new ArrayList<Bus>();
 
         JSONArray jsonArray=new JSONArray(jsonString);
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -76,14 +73,14 @@ public class App {
 
             Bus bus= new Bus(JObject.get("id").toString(), JObject.get("lineName").toString(), Integer.parseInt(JObject.get("timeToStation").toString()), JObject.get("destinationName").toString());
 
-            BusesToStop.put(JObject.get("timeToStation").toString(), bus);
-            timesToArrival.add(Integer.parseInt(JObject.get("timeToStation").toString()));
+            timesToArrival.add(bus);
 
 
 
         }
 
-        Collections.sort(timesToArrival);
+        Collections.sort(timesToArrival, (b1, b2) -> b1.getSecondsTimeToStation()- b2.getSecondsTimeToStation());
+
 
 
 
@@ -91,7 +88,7 @@ public class App {
 
         for (int i = 0; i < numberOfBusesToDisplay ; i++) {
 
-            BusesToStop.get(timesToArrival.get(i).toString()).getArrivalMessage();
+            timesToArrival.get(i).getArrivalMessage();
 
         }
 
