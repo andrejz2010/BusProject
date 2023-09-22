@@ -5,24 +5,45 @@ package busproject;
 
 
 
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.Array;
 import java.net.URI;
-import java.net.URLConnection;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Scanner;
+import java.util.ArrayList;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-import java.nio.charset.Charset;
 
 
 
 public class App {
+
+
+
+    public static String fetch(String url) {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .build();
+
+
+        String response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body) // tells the httpresponse instance(which has been stored) to use the body
+                // method(thenapply is a public method of completablefuture class)
+                .join();
+
+
+        return response;
+    }
+
 
 
 
@@ -34,28 +55,45 @@ public class App {
 
 
 
-        Scanner sc= new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
         System.out.println("Input bus stop code:");
-        String userStopCodeInput=sc.nextLine();   //490000129R
-
-        System.out.println(userStopCodeInput);
-
-String urlAPI="https://api.tfl.gov.uk/StopPoint/"+userStopCodeInput+"/Arrivals/?app_key=68d5f5951c8f4ab98a9b491f59c96c18";
+        String userStopCodeInput = sc.nextLine();   //490000129R
 
 
+        String BUSESONSTOP_URL_API = "https://api.tfl.gov.uk/StopPoint/" + userStopCodeInput + "/Arrivals/?app_key=68d5f5951c8f4ab98a9b491f59c96c18";
 
-        // Connect to the URL using java's native library
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(urlAPI))
-                .build();
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply(HttpResponse::body)
-                .thenAccept(System.out::println)
-                .join();
 
-       request.headers();
+       String jsonString= fetch(BUSESONSTOP_URL_API);
 
+
+
+        HashMap<String, Bus> BusesToStop = new HashMap<String , Bus>();
+        ArrayList<Integer> timesToArrival = new ArrayList<Integer>();
+
+        JSONArray jsonArray=new JSONArray(jsonString);
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject JObject = jsonArray.getJSONObject(i);
+
+            Bus bus= new Bus(JObject.get("id").toString(), JObject.get("lineName").toString(), Integer.parseInt(JObject.get("timeToStation").toString()), JObject.get("destinationName").toString());
+
+            BusesToStop.put(JObject.get("timeToStation").toString(), bus);
+            timesToArrival.add(Integer.parseInt(JObject.get("timeToStation").toString()));
+
+
+
+        }
+
+        Collections.sort(timesToArrival);
+
+
+
+        int numberOfBusesToDisplay=5;
+
+        for (int i = 0; i < numberOfBusesToDisplay ; i++) {
+
+            BusesToStop.get(timesToArrival.get(i).toString()).getArrivalMessage();
+
+        }
 
 
 
